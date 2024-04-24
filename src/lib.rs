@@ -35,7 +35,7 @@ fn get_files<P: AsRef<Path>>(dir: P) -> Vec<PathBuf> {
             files.push(path)
         } else if path.is_dir() {
             for file in get_files(&path) {
-                files.push(file.into())
+                files.push(file)
             }
         }
     }
