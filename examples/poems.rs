@@ -18,7 +18,9 @@ fn main() {
     }
     let nightingale = Path::new("keats/ode-to-a-nightingale.txt");
     println!("{}", nightingale.to_string_lossy());
-    let nightingale_text = hashmap.get(nightingale)
-        .and_then(|entry| from_utf8(*entry).ok()).unwrap();
+    let nightingale_text = hashmap
+        .get(nightingale)
+        .and_then(|entry| from_utf8(*entry).ok())
+        .unwrap();
     println!("{}", nightingale_text);
 }

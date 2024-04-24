@@ -4,12 +4,11 @@ extern crate proc_macro;
 #[macro_use]
 extern crate quote;
 
+use proc_macro::TokenStream;
 use std::path::{Path, PathBuf};
 use std::str;
-use proc_macro::TokenStream;
 
-use syn::{Lit, StrStyle, Token, TokenTree, parse_token_trees};
-
+use syn::{parse_token_trees, Lit, StrStyle, Token, TokenTree};
 
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
@@ -18,7 +17,6 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
     let gen = impl_include_dir(args).unwrap();
     gen.parse().unwrap()
 }
-
 
 fn get_files<P: AsRef<Path>>(dir: P) -> Vec<PathBuf> {
     let mut files = vec![];
@@ -37,7 +35,6 @@ fn get_files<P: AsRef<Path>>(dir: P) -> Vec<PathBuf> {
     }
     files
 }
-
 
 fn path_to_str_literal<P: AsRef<Path>>(path: P) -> Token {
     Token::Literal(Lit::Str(
@@ -59,7 +56,6 @@ fn get_path_from_args(args: Vec<TokenTree>) -> Result<PathBuf, &'static str> {
         _ => Err("multiple trees"),
     }
 }
-
 
 fn impl_include_dir(args: Vec<TokenTree>) -> Result<quote::Tokens, &'static str> {
     let dir = get_path_from_args(args)?;
