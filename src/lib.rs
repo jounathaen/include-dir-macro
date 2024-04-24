@@ -10,11 +10,17 @@ use std::str;
 
 use syn::{parse_token_trees, Lit, StrStyle, Token, TokenTree};
 
+#[cfg(feature = "no_std")]
+fn round_pow_2(i: usize) -> usize {
+    let f = i as f64;
+    (2.0_f64).powf(f.log(2.0).ceil()) as usize
+}
+
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
-    let foo = input.to_string();
-    let args = parse_token_trees(&foo).unwrap();
-    let gen = impl_include_dir(args).unwrap();
+    let directory = input.to_string();
+    let dir_tokenized = parse_token_trees(&directory).unwrap();
+    let gen = impl_include_dir(dir_tokenized).unwrap();
     gen.parse().unwrap()
 }
 
@@ -73,11 +79,26 @@ fn impl_include_dir(args: Vec<TokenTree>) -> Result<quote::Tokens, &'static str>
         .map(path_to_str_literal)
         .collect();
 
-    Ok(quote! {
-        {
-            let mut __include_dir_hashmap = ::std::collections::HashMap::new();
-            #( __include_dir_hashmap.insert(::std::path::Path::new(#keys), &include_bytes!(#vals)[..]); )*
-            __include_dir_hashmap
-        }
-    })
+    #[cfg(not(feature = "no_std"))]
+    {
+        Ok(quote! {
+            {
+                let mut __include_dir_hashmap = ::std::collections::HashMap::new();
+                #( __include_dir_hashmap.insert(::std::path::Path::new(#keys), &include_bytes!(#vals)[..]); )*
+                __include_dir_hashmap
+            }
+        })
+    }
+
+    #[cfg(feature = "no_std")]
+    {
+        let nr_entries = round_pow_2(keys.len());
+        Ok(quote! {
+            {
+                let mut __include_dir_hashmap = heapless::FnvIndexMap::<_, _, #nr_entries>::new();
+                #( __include_dir_hashmap.insert(#keys, &include_bytes!(#vals)[..]).unwrap(); )*
+                __include_dir_hashmap
+            }
+        })
+    }
 }
