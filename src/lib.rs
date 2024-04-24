@@ -85,12 +85,3 @@ fn impl_include_dir(args: Vec<TokenTree>) -> Result<quote::Tokens, &'static str>
         }
     })
 }
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
